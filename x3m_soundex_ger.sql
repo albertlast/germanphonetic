@@ -1,7 +1,6 @@
 /**
 	Inhalt:
 		SOUNDEX_GER():       Codierung deutscher Namen nach dem Kölner Verfahren
-		SOUNDEX_GER_MW():    Multi-Word-Wrapper für SOUNDEX_GER()
 
 **/
 
@@ -76,16 +75,16 @@
    * W.Frick, 10/2011: Bug Fix & Performance Tuning (Dauer ca. 1/3 gegenüber Original) und Multi-Word Version SOUNDEX_GER_MW()
    */
    
-   CREATE OR REPLACE FUNCTION "SOUNDEX_GER" (strWord IN VARCHAR2,
-                                             intLen IN NUMBER DEFAULT 255)
-				return VARCHAR2  is
+   CREATE or REPLACE FUNCTION soundex_ger(IN strWord character varying, IN intLen numeric DEFAULT 255) 
+	RETURNS character varying AS $$
       
-     Word varchar2(255);
-     WordLen number;
-     checkLen number;
-     Code varchar2(255);
-     PhoneticCode varchar2(255);
-     intX number;
+     DECLARE
+	Word varchar(255);
+	WordLen numeric;
+	checkLen int;
+	Code varchar(255) default '';
+	PhoneticCode varchar(255);
+	intX int;
    
    begin
    
@@ -105,7 +104,7 @@
 					Translate(Word, 'vwjyäöüéèêàáç', 'ffiiaoueeeaac'),
 				'ph', 'f'),
 			'ß', 'ss'),
-		'[^a-zA-Z]', Null);
+		'[^a-zA-Z]', '');
 
 
         WordLen := LENGTH(Word);
@@ -198,44 +197,5 @@
 
         return PhoneticCode;
    
-   end SOUNDEX_GER;
-/
-
-
-
-   CREATE OR REPLACE FUNCTION "SOUNDEX_GER_MW" (strWord IN VARCHAR2) return VARCHAR2 Is
-   -- Die Funktion bricht den Eingabe-String in einzelne Worte auf und codiert jedes einzelne Wort mit SOUNDEX_GER()
-   -- Author: W.Frick, 10/2011
-
-   len number;
-   i number;
-   k number;
-   in_string varchar2(4000);
-   out_string varchar2(4000);
-   KEY_LENGTH constant number := 4;
-
-   Begin
-	i := 1;
-	out_string := null ;
-	--16.10.2012 Andy Theiler: Zeilenumbruch entfernen bzw wie eine Worttrennung behandeln.
-	--in_string := substr(Translate(strWord,'.,-;','    '),1,4000);
-	in_string := REGEXP_REPLACE(substr(Translate(strWord,'.,-;','    '),1,4000),  '([[:cntrl:]])|(^\t)', ' ');   
-	
-	len := Length(in_string) ;
-
-        while i <= len loop
-		k := InStr(in_string, ' ', i);
-		Case
-		   When (k = i) Then i := i +1;
-		   When (k > i) Then
-			out_string := trim(out_string || ' ' || substr(SOUNDEX_GER(substr(in_string, i, k-i)),1,KEY_LENGTH)) ;
-			i := k+1 ;
-		   When (K = 0) Then
-			out_string := trim(out_string || ' ' || substr(SOUNDEX_GER(substr(in_string, i)),1,KEY_LENGTH)) ;
-			i := len +1;
-           	End case;
-        end loop;
-
-	return out_string;
-   End SOUNDEX_GER_MW;
-/
+   end;
+$$ LANGUAGE plpgsql VOLATILE NOT LEAKPROOF;
