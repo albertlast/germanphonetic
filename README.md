@@ -5,9 +5,7 @@ Implementationen
 ----------------
 
 
-- **Oracle PL/SQL**: `x3m_soundex_ger.sql`
-
-- **PHP**: `x3m_soundex_ger.php`
+- **PostgreSQL PL/PGSQL**: `x3m_soundex_ger.sql`
 
 
 Einleitung
@@ -83,27 +81,11 @@ Der Name "Müller-Lüdenscheidt" wird folgendermaßen kodiert:
 
 Code Beispiele
 --------------
-###PHP
-```php
-require_once 'x3m_soundex_ger.php';
-$phoneticcode = soundex_ger("Meier");
-```
-
-###Oracle PL/SQL
+###PostgreSQL PL/PGSQL
 
 #####Funktion: SOUNDEX_GER()
 
 
 ```sql
-Select SOUNDEX_GER('Meier'), SOUNDEX_GER('Meyer') from Dual
+Select SOUNDEX_GER('Meier'), SOUNDEX_GER('Meyer') 
 ```
-
-#####Funktion: SOUNDEX\_GER_MW()
-
-Die Funktion **SOUNDEX\_GER_MW()** dient als Multi-Word-Wrapper von **SOUNDEX_GER()**. d.h. Die Funktion bricht den Eingabe-String in einzelne Worte auf und codiert jedes einzelne Wort mit **SOUNDEX_GER()**.
-
-```sql
-Select SOUNDEX_GER_MW('Mueller Luedenscheidt') from Dual
-```
-
-> Die Multi-Word-Funktion ist deshalb wichtig, weil auch schon das im Netz üblicherweise dokumentierte Beispiel Müller-Lüdenscheidt eigentlich falsch gewählt ist. Müller-Lüdenscheidt sind 2 Wörter und damit gibt es 2 Anlaute und 2 Auslaute. Bei diesem Beispiel tritt das nicht zu Tage, aber z.B. bei Heinz Classen (im Unterschied zu HeinzClassen, was nämlich normalerweise kodiert würde). Wird "Heinz Classen" mit der üblichen Implementierung kodiert und dabei ignoriert, dass es sich um 2 Wörter handelt, dann entsteht 068586, wobei Z zu 8 und C ebenfalls zu 8 wird und die zweite 8 entfällt. Wird es als zwei Wörter behandelt, dann wird C zu 4 und bleibt erhalten, also 068 4586.
